@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 
 # 1. 페이지 기본 설정 및 모던 MBTI 디자인 CSS 적용
@@ -48,7 +49,7 @@ st.markdown("""
     /* MBTI 결과 카드 스타일 */
     .mbti-result-card {
         background: linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%);
-        padding: 36px 28px;
+        padding: 32px 24px;
         border-radius: 24px;
         border: 2px solid #6366f1;
         box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.15);
@@ -64,13 +65,13 @@ st.markdown("""
         padding: 6px 18px;
         border-radius: 30px;
         letter-spacing: 1px;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
     }
     .mbti-title {
         font-size: 26px;
         font-weight: 800;
         color: #1e1b4b;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
     }
     .mbti-desc {
         font-size: 15px;
@@ -82,17 +83,58 @@ st.markdown("""
         border-radius: 16px;
         border: 1px solid #e0e7ff;
         white-space: pre-line;
+        margin-top: 16px;
+    }
+
+    /* MBTI 양방향 퍼센트 비교 바 스타일 */
+    .trait-box {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 16px;
+        border: 1px solid #e0e7ff;
+        margin-top: 16px;
+        text-align: left;
+    }
+    .trait-title {
+        font-size: 15px;
+        font-weight: 800;
+        color: #1e1b4b;
+        margin-bottom: 14px;
+        text-align: center;
+    }
+    .trait-row {
+        margin-bottom: 14px;
+    }
+    .trait-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    .bar-bg {
+        width: 100%;
+        height: 12px;
+        background-color: #e2e8f0;
+        border-radius: 999px;
+        overflow: hidden;
+        display: flex;
+    }
+    .bar-left {
+        height: 100%;
+        transition: width 0.5s ease;
+    }
+    .bar-right {
+        height: 100%;
+        transition: width 0.5s ease;
     }
     </style>
 """, unsafe_allow_html=True)
 
 
-# ====================================================
-# 1. 클래스 적용 (Class) & 자료구조 (dict, tuple, list)
-# ====================================================
+# 클래스 정의 (데이터 + 점수/퍼센트 계산 로직)
 class UniversityMBTITest:
     def __init__(self):
-        # 딕셔너리(dict) 및 튜플(tuple) 자료구조 - 원본 데이터 100% 보존
         self.dataset = {
             "questions": (
                 "1. 과제가 일주일 뒤까지라면 나는?", 
@@ -162,7 +204,6 @@ class UniversityMBTITest:
             )
         }
         
-        # 16가지 결과 유형 딕셔너리 - 원본 텍스트 100% 보존
         self.results_info = {
             "PSGB": ("학점 사수형", "공부와 과제를 미리 계획해서 준비하고, 주변 사람들과도 잘 어울리는 유형이다.\n\n대학생활에서 학점과 진로를 중요하게 생각하며 공강이나 여유 시간도 공부, 자격증, 대외활동 등에 활용하는 편이다."),
             "PSGR": ("출석 만점형", "수업과 과제를 계획적으로 챙기고 친구들과도 원만하게 지내는 유형이다.\n\n학점과 학교생활을 성실하게 관리하지만 지나치게 많은 활동을 하기보다는 안정적인 생활을 선호한다."),
@@ -182,62 +223,56 @@ class UniversityMBTITest:
             "CIER": ("자체휴강형", "공부나 과제를 미리 준비하는 편이 아니며 혼자 있는 시간과 여유를 중요하게 생각하는 유형이다.\n\n학교생활에 필요한 만큼만 참여하고 공강이나 빈 시간이 생기면 집이나 기숙사에서 쉬는 것을 선호한다.")
         }
 
-    # ====================================================
-    # 2. 함수 정의 (def), 반복문 (while, for), 조건문 (if/elif/else)
-    # ====================================================
     def calculate_mbti(self, user_answers_list):
-        # 리스트(list) 자료구조 적용
         response = [0, 0, 0, 0]
+        a_counts = [0, 0, 0, 0]  # 각 축별 A 선택 횟수(0~5) 저장
         idx = 0
         
-        # while 반복문 사용
         while idx < len(user_answers_list):
             ans = user_answers_list[idx]
-            
-            # 조건문 (if/elif/else) 적용
-            if ans == "A":
-                score = 1
-            else:
-                score = -1
+            score = 1 if ans == "A" else -1
+            is_a = 1 if ans == "A" else 0
 
             if idx < 5:
                 response[0] += score
+                a_counts[0] += is_a
             elif idx < 10:
                 response[1] += score
+                a_counts[1] += is_a
             elif idx < 15:
                 response[2] += score
+                a_counts[2] += is_a
             else:
                 response[3] += score
+                a_counts[3] += is_a
             
             idx += 1
 
-        isP = response[0] > 0
-        isS = response[1] > 0
-        isG = response[2] > 0
-        isB = response[3] > 0
-
         mbti_code = ""
-        mbti_code += "P" if isP else "C"
-        mbti_code += "S" if isS else "I"
-        mbti_code += "G" if isG else "E"
-        mbti_code += "B" if isB else "R"
+        mbti_code += "P" if response[0] > 0 else "C"
+        mbti_code += "S" if response[1] > 0 else "I"
+        mbti_code += "G" if response[2] > 0 else "E"
+        mbti_code += "B" if response[3] > 0 else "R"
 
-        return mbti_code, self.results_info.get(mbti_code, ("알 수 없음", "결과를 찾을 수 없습니다."))
+        # 4개 축별 대립 성향 퍼센트 계산 (축당 5문항 -> A 1개당 20%)
+        percentages = [
+            ("P (계획형)", a_counts[0] * 20, "C (벼락치기형)", (5 - a_counts[0]) * 20, "#4f46e5", "#f59e0b"),
+            ("S (사교형)", a_counts[1] * 20, "I (개인형)", (5 - a_counts[1]) * 20, "#10b981", "#6366f1"),
+            ("G (학점·진로형)", a_counts[2] * 20, "E (경험·추억형)", (5 - a_counts[2]) * 20, "#0ea5e9", "#ec4899"),
+            ("B (바쁜 일정형)", a_counts[3] * 20, "R (여유형)", (5 - a_counts[3]) * 20, "#8b5cf6", "#14b8a6"),
+        ]
+
+        return mbti_code, self.results_info.get(mbti_code, ("알 수 없음", "결과를 찾을 수 없습니다.")), percentages
 
 
-# 인스턴스 객체 생성
 app = UniversityMBTITest()
 
-# ====================================================
-# 3. 세션 상태 관리 (페이지 이동)
-# ====================================================
 if "current_q" not in st.session_state:
     st.session_state.current_q = 0
 
 if "user_answers" not in st.session_state:
     st.session_state.user_answers = ["A"] * 20
 
-# 상단 헤더
 st.markdown("""
     <div class="mbti-header">
         <h2>🎓 대학생활 성향 유형 테스트</h2>
@@ -248,9 +283,7 @@ st.markdown("""
 total_q = len(app.dataset["questions"])
 current_idx = st.session_state.current_q
 
-# ----------------------------------------------------
-# 화면 1: 질문 카드 화면 ([이전] / [다음] 페이지 이동 지원)
-# ----------------------------------------------------
+# 화면 1: 질문 카드 화면
 if current_idx < total_q:
     progress_val = (current_idx + 1) / total_q
     st.progress(progress_val)
@@ -260,7 +293,6 @@ if current_idx < total_q:
     ans_a = app.dataset["answersA"][current_idx]
     ans_b = app.dataset["answersB"][current_idx]
 
-    # 질문 상자
     st.markdown(f'<div class="q-box"><h3>{q_text}</h3></div>', unsafe_allow_html=True)
 
     saved_choice = st.session_state.user_answers[current_idx]
@@ -278,7 +310,6 @@ if current_idx < total_q:
     st.write("")
     col1, col2 = st.columns([1, 1])
 
-    # 이전 버튼
     with col1:
         if current_idx > 0:
             if st.button("⬅️ 이전 질문", use_container_width=True):
@@ -286,7 +317,6 @@ if current_idx < total_q:
                 st.session_state.current_q -= 1
                 st.rerun()
 
-    # 다음 / 결과 버튼
     with col2:
         btn_label = "결과 확인하기 🚀" if current_idx == total_q - 1 else "다음 질문 ➡️"
         if st.button(btn_label, type="primary", use_container_width=True):
@@ -294,22 +324,50 @@ if current_idx < total_q:
             st.session_state.current_q += 1
             st.rerun()
 
-# ----------------------------------------------------
-# 화면 2: MBTI 스타일 결과 화면
-# ----------------------------------------------------
+# 화면 2: 결과 화면 (유형 카드 + 이미지 + 대립 축 퍼센트 비교 바)
 else:
-    mbti_code, (title, desc) = app.calculate_mbti(st.session_state.user_answers)
-
+    mbti_code, (title, desc), percentages = app.calculate_mbti(st.session_state.user_answers)
     st.balloons()
-    
+
+    # 1) 상단 유형 배지 및 제목
     st.markdown(f"""
         <div class="mbti-result-card">
             <span class="mbti-badge">{mbti_code}</span>
             <div class="mbti-title">{title}</div>
-            <div class="mbti-desc">{desc}</div>
         </div>
     """, unsafe_allow_html=True)
-    
+
+    # 2) 유형별 이미지 표시 (images/PSGB.png 형태 파일이 있으면 자동 출력)
+    img_path = f"images/{mbti_code}.png"
+    if os.path.exists(img_path):
+        st.write("")
+        _, img_col, _ = st.columns([1, 2, 1])
+        with img_col:
+            st.image(img_path, caption=f"{mbti_code} - {title}", use_container_width=True)
+
+    # 3) 유형 상세 설명
+    st.markdown(f'<div class="mbti-desc">{desc}</div>', unsafe_allow_html=True)
+
+    # 4) MBTI 스타일 대립 성향 퍼센트 비교 그래프
+    bars_html = '<div class="trait-box"><div class="trait-title">📊 나의 4가지 대학생활 성향 비율</div>'
+    for left_name, left_pct, right_name, right_pct, left_color, right_color in percentages:
+        left_bold = "800" if left_pct > right_pct else "500"
+        right_bold = "800" if right_pct > left_pct else "500"
+        bars_html += f"""
+        <div class="trait-row">
+            <div class="trait-labels">
+                <span style="color:{left_color}; font-weight:{left_bold};">{left_name} {left_pct}%</span>
+                <span style="color:{right_color}; font-weight:{right_bold};">{right_pct}% {right_name}</span>
+            </div>
+            <div class="bar-bg">
+                <div class="bar-left" style="width:{left_pct}%; background-color:{left_color};"></div>
+                <div class="bar-right" style="width:{right_pct}%; background-color:{right_color};"></div>
+            </div>
+        </div>
+        """
+    bars_html += '</div>'
+    st.markdown(bars_html, unsafe_allow_html=True)
+
     st.write("")
     st.caption("※ 본 테스트는 단순 성향 참고용으로 제공됩니다.")
     st.divider()
