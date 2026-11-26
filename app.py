@@ -4,132 +4,24 @@ import streamlit as st
 # 1. 페이지 기본 설정 및 모던 MBTI 디자인 CSS 적용
 st.set_page_config(page_title="대학생활 성향 유형 테스트", page_icon="🎓", layout="centered")
 
-st.markdown("""
-    <style>
-    .stApp {
-        background-color: #f8fafc;
-    }
-    
-    /* 상단 MBTI 헤더 */
-    .mbti-header {
-        text-align: center;
-        padding: 10px 0 20px 0;
-    }
-    .mbti-header h2 {
-        font-size: 24px !important;
-        font-weight: 800 !important;
-        color: #4f46e5 !important;
-        margin-bottom: 4px !important;
-    }
-    .mbti-header p {
-        color: #64748b;
-        font-size: 14px;
-        margin: 0;
-    }
-
-    /* 질문 전용 카드 상자 */
-    .q-box {
-        background-color: #ffffff;
-        padding: 32px 24px;
-        border-radius: 20px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-        text-align: center;
-        margin-top: 10px;
-        margin-bottom: 20px;
-    }
-    .q-box h3 {
-        color: #0f172a;
-        font-size: 20px !important;
-        font-weight: 700 !important;
-        line-height: 1.5 !important;
-        margin: 0 !important;
-    }
-
-    /* MBTI 결과 카드 스타일 */
-    .mbti-result-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%);
-        padding: 32px 24px;
-        border-radius: 24px;
-        border: 2px solid #6366f1;
-        box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.15);
-        text-align: center;
-        margin-top: 10px;
-    }
-    .mbti-badge {
-        display: inline-block;
-        background: #4f46e5;
-        color: #ffffff;
-        font-size: 15px;
-        font-weight: 800;
-        padding: 6px 18px;
-        border-radius: 30px;
-        letter-spacing: 1px;
-        margin-bottom: 12px;
-    }
-    .mbti-title {
-        font-size: 26px;
-        font-weight: 800;
-        color: #1e1b4b;
-        margin-bottom: 16px;
-    }
-    .mbti-desc {
-        font-size: 15px;
-        line-height: 1.8;
-        color: #334155;
-        text-align: left;
-        background: #ffffff;
-        padding: 20px;
-        border-radius: 16px;
-        border: 1px solid #e0e7ff;
-        white-space: pre-line;
-        margin-top: 16px;
-    }
-
-    /* MBTI 양방향 퍼센트 비교 바 스타일 */
-    .trait-box {
-        background: #ffffff;
-        padding: 20px;
-        border-radius: 16px;
-        border: 1px solid #e0e7ff;
-        margin-top: 16px;
-        text-align: left;
-    }
-    .trait-title {
-        font-size: 15px;
-        font-weight: 800;
-        color: #1e1b4b;
-        margin-bottom: 14px;
-        text-align: center;
-    }
-    .trait-row {
-        margin-bottom: 14px;
-    }
-    .trait-labels {
-        display: flex;
-        justify-content: space-between;
-        font-size: 13px;
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
-    .bar-bg {
-        width: 100%;
-        height: 12px;
-        background-color: #e2e8f0;
-        border-radius: 999px;
-        overflow: hidden;
-        display: flex;
-    }
-    .bar-left {
-        height: 100%;
-        transition: width 0.5s ease;
-    }
-    .bar-right {
-        height: 100%;
-        transition: width 0.5s ease;
-    }
-    </style>
-""", unsafe_allow_html=True)
+st.markdown("""<style>
+.stApp { background-color: #f8fafc; }
+.mbti-header { text-align: center; padding: 10px 0 20px 0; }
+.mbti-header h2 { font-size: 24px !important; font-weight: 800 !important; color: #4f46e5 !important; margin-bottom: 4px !important; }
+.mbti-header p { color: #64748b; font-size: 14px; margin: 0; }
+.q-box { background-color: #ffffff; padding: 32px 24px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); text-align: center; margin-top: 10px; margin-bottom: 20px; }
+.q-box h3 { color: #0f172a; font-size: 20px !important; font-weight: 700 !important; line-height: 1.5 !important; margin: 0 !important; }
+.mbti-result-card { background: linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%); padding: 32px 24px; border-radius: 24px; border: 2px solid #6366f1; box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.15); text-align: center; margin-top: 10px; }
+.mbti-badge { display: inline-block; background: #4f46e5; color: #ffffff; font-size: 15px; font-weight: 800; padding: 6px 18px; border-radius: 30px; letter-spacing: 1px; margin-bottom: 12px; }
+.mbti-title { font-size: 26px; font-weight: 800; color: #1e1b4b; margin-bottom: 4px; }
+.mbti-desc { font-size: 15px; line-height: 1.8; color: #334155; text-align: left; background: #ffffff; padding: 20px; border-radius: 16px; border: 1px solid #e0e7ff; white-space: pre-line; margin-top: 16px; }
+.trait-box { background: #ffffff; padding: 22px 20px; border-radius: 16px; border: 1px solid #e0e7ff; margin-top: 16px; }
+.trait-title { font-size: 16px; font-weight: 800; color: #1e1b4b; margin-bottom: 16px; text-align: center; }
+.trait-row { margin-bottom: 16px; }
+.trait-row:last-child { margin-bottom: 0; }
+.trait-labels { display: flex; justify-content: space-between; font-size: 13.5px; margin-bottom: 6px; }
+.bar-bg { width: 100%; height: 14px; background-color: #e2e8f0; border-radius: 999px; overflow: hidden; display: flex; }
+</style>""", unsafe_allow_html=True)
 
 
 # 클래스 정의 (데이터 + 점수/퍼센트 계산 로직)
@@ -225,7 +117,7 @@ class UniversityMBTITest:
 
     def calculate_mbti(self, user_answers_list):
         response = [0, 0, 0, 0]
-        a_counts = [0, 0, 0, 0]  # 각 축별 A 선택 횟수(0~5) 저장
+        a_counts = [0, 0, 0, 0]
         idx = 0
         
         while idx < len(user_answers_list):
@@ -254,12 +146,11 @@ class UniversityMBTITest:
         mbti_code += "G" if response[2] > 0 else "E"
         mbti_code += "B" if response[3] > 0 else "R"
 
-        # 4개 축별 대립 성향 퍼센트 계산 (축당 5문항 -> A 1개당 20%)
         percentages = [
-            ("P (계획형)", a_counts[0] * 20, "C (벼락치기형)", (5 - a_counts[0]) * 20, "#4f46e5", "#f59e0b"),
-            ("S (사교형)", a_counts[1] * 20, "I (개인형)", (5 - a_counts[1]) * 20, "#10b981", "#6366f1"),
-            ("G (학점·진로형)", a_counts[2] * 20, "E (경험·추억형)", (5 - a_counts[2]) * 20, "#0ea5e9", "#ec4899"),
-            ("B (바쁜 일정형)", a_counts[3] * 20, "R (여유형)", (5 - a_counts[3]) * 20, "#8b5cf6", "#14b8a6"),
+            ("P (계획형)", int(a_counts[0] * 20), "C (벼락치기형)", int((5 - a_counts[0]) * 20), "#4f46e5", "#f59e0b"),
+            ("S (사교형)", int(a_counts[1] * 20), "I (개인형)", int((5 - a_counts[1]) * 20), "#10b981", "#6366f1"),
+            ("G (학점·진로형)", int(a_counts[2] * 20), "E (경험·추억형)", int((5 - a_counts[2]) * 20), "#0ea5e9", "#ec4899"),
+            ("B (바쁜 일정형)", int(a_counts[3] * 20), "R (여유형)", int((5 - a_counts[3]) * 20), "#8b5cf6", "#14b8a6"),
         ]
 
         return mbti_code, self.results_info.get(mbti_code, ("알 수 없음", "결과를 찾을 수 없습니다.")), percentages
@@ -273,12 +164,7 @@ if "current_q" not in st.session_state:
 if "user_answers" not in st.session_state:
     st.session_state.user_answers = ["A"] * 20
 
-st.markdown("""
-    <div class="mbti-header">
-        <h2>🎓 대학생활 성향 유형 테스트</h2>
-        <p>나의 대학생활 스타일을 MBTI 검사처럼 확인해보세요!</p>
-    </div>
-""", unsafe_allow_html=True)
+st.markdown('<div class="mbti-header"><h2>🎓 대학생활 성향 유형 테스트</h2><p>나의 대학생활 스타일을 MBTI 검사처럼 확인해보세요!</p></div>', unsafe_allow_html=True)
 
 total_q = len(app.dataset["questions"])
 current_idx = st.session_state.current_q
@@ -330,14 +216,9 @@ else:
     st.balloons()
 
     # 1) 상단 유형 배지 및 제목
-    st.markdown(f"""
-        <div class="mbti-result-card">
-            <span class="mbti-badge">{mbti_code}</span>
-            <div class="mbti-title">{title}</div>
-        </div>
-    """, unsafe_allow_html=True)
+    st.markdown(f'<div class="mbti-result-card"><span class="mbti-badge">{mbti_code}</span><div class="mbti-title">{title}</div></div>', unsafe_allow_html=True)
 
-    # 2) 유형별 이미지 표시 (images/PSGB.png 형태 파일이 있으면 자동 출력)
+    # 2) 유형별 이미지 표시 (images/PSGB.png 파일이 존재할 때 자동 출력)
     img_path = f"images/{mbti_code}.png"
     if os.path.exists(img_path):
         st.write("")
@@ -348,25 +229,27 @@ else:
     # 3) 유형 상세 설명
     st.markdown(f'<div class="mbti-desc">{desc}</div>', unsafe_allow_html=True)
 
-    # 4) MBTI 스타일 대립 성향 퍼센트 비교 그래프
-    bars_html = '<div class="trait-box"><div class="trait-title">📊 나의 4가지 대학생활 성향 비율</div>'
+    # 4) MBTI 스타일 대립 성향 퍼센트 비교 그래프 (들여쓰기 제거로 HTML 깨짐 방지)
+    html_parts = ['<div class="trait-box"><div class="trait-title">📊 나의 4가지 대학생활 성향 비율</div>']
     for left_name, left_pct, right_name, right_pct, left_color, right_color in percentages:
-        left_bold = "800" if left_pct > right_pct else "500"
-        right_bold = "800" if right_pct > left_pct else "500"
-        bars_html += f"""
-        <div class="trait-row">
-            <div class="trait-labels">
-                <span style="color:{left_color}; font-weight:{left_bold};">{left_name} {left_pct}%</span>
-                <span style="color:{right_color}; font-weight:{right_bold};">{right_pct}% {right_name}</span>
-            </div>
-            <div class="bar-bg">
-                <div class="bar-left" style="width:{left_pct}%; background-color:{left_color};"></div>
-                <div class="bar-right" style="width:{right_pct}%; background-color:{right_color};"></div>
-            </div>
-        </div>
-        """
-    bars_html += '</div>'
-    st.markdown(bars_html, unsafe_allow_html=True)
+        left_weight = "800" if left_pct > right_pct else "500"
+        right_weight = "800" if right_pct > left_pct else "500"
+        row_html = (
+            f'<div class="trait-row">'
+            f'<div class="trait-labels">'
+            f'<span style="color:{left_color}; font-weight:{left_weight};">{left_name} {left_pct}%</span>'
+            f'<span style="color:{right_color}; font-weight:{right_weight};">{right_pct}% {right_name}</span>'
+            f'</div>'
+            f'<div class="bar-bg">'
+            f'<div style="width:{left_pct}%; height:100%; background-color:{left_color};"></div>'
+            f'<div style="width:{right_pct}%; height:100%; background-color:{right_color};"></div>'
+            f'</div>'
+            f'</div>'
+        )
+        html_parts.append(row_html)
+    html_parts.append('</div>')
+    
+    st.markdown("".join(html_parts), unsafe_allow_html=True)
 
     st.write("")
     st.caption("※ 본 테스트는 단순 성향 참고용으로 제공됩니다.")
